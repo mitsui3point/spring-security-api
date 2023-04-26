@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,13 +44,12 @@ class MessageControllerTest {
     }
 
     @Test
+    @WithAnonymousUser
     @DisplayName("/messages 호출시 http status UNAUTHORIZED 를 리턴한다.")
-    void messages() throws Exception {
+    void messagesAccessFail() throws Exception {
         //when
-        mvc.perform(post(MESSAGES_URL)
+        mvc.perform(get(MESSAGES_URL)
                         .with(csrf())
-                        .param("username", "")
-                        .param("password", "")
                 )
                 //then
                 .andExpect(status().isUnauthorized());

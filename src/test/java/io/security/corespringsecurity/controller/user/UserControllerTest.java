@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,12 +37,12 @@ class UserControllerTest {
     }
 
     @Test
+    @WithAnonymousUser
     @DisplayName("권한없이 /mypage 호출시 http status UNAUTHORIZED 를 리턴한다.")
-    void myPageFailTest() throws Exception {
+    void myPageAccessFail() throws Exception {
         //when
-        mvc.perform(formLogin(MYPAGE_URL)
-                        .user("")
-                        .password("")
+        mvc.perform(get(MYPAGE_URL)
+                        .with(csrf())
                 )
                 //then
                 .andExpect(status().isUnauthorized());
