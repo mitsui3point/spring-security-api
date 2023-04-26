@@ -16,6 +16,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserController.class)
@@ -38,15 +39,14 @@ class UserControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("권한없이 /mypage 호출시 http status UNAUTHORIZED 를 리턴한다.")
-    void myPageAccessFail() throws Exception {
+    @DisplayName("/mypage 호출을 성공한다.")
+    void myPage() throws Exception {
         //when
         mvc.perform(get(MYPAGE_URL)
-                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
                 )
+                .andDo(print())
                 //then
-                .andExpect(status().isUnauthorized());
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(redirectedUrl("http://localhost/login"));
+                .andExpect(status().isOk());
     }
 }

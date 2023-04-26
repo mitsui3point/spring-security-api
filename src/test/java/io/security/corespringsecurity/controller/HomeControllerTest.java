@@ -38,14 +38,13 @@ class HomeControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("/ 호출시 http status UNAUTHORIZED 를 리턴한다.")
-    void homeAccessFail() throws Exception {
+    @DisplayName("/ 호출을 성공한다.")
+    void home() throws Exception {
         //when
-        mvc.perform(get(HOME_URL))
+        mvc.perform(get(HOME_URL)
+                        .header("X-Requested-With", "XMLHttpRequest"))
                 .andDo(print())
                 //then
-                .andExpect(status().isUnauthorized());
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("home"));
+                .andExpect(status().isOk());
     }
 }

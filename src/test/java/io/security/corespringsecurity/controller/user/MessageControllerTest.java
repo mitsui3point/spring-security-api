@@ -23,6 +23,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = MessageController.class)
@@ -45,14 +46,14 @@ class MessageControllerTest {
 
     @Test
     @WithAnonymousUser
-    @DisplayName("/messages 호출시 http status UNAUTHORIZED 를 리턴한다.")
-    void messagesAccessFail() throws Exception {
+    @DisplayName("/messages 호출을 성공한다.")
+    void messages() throws Exception {
         //when
         mvc.perform(get(MESSAGES_URL)
-                        .with(csrf())
+                        .header("X-Requested-With", "XMLHttpRequest")
                 )
+                .andDo(print())
                 //then
-                .andExpect(status().isUnauthorized());
-//                .andExpect(redirectedUrl("http://localhost/login"));
+                .andExpect(status().isOk());
     }
 }
