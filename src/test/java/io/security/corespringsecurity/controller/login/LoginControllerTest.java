@@ -90,7 +90,6 @@ public class LoginControllerTest {
                 )
                 .andDo(print())
                 //then
-                .andExpect(status().isForbidden())
                 .andExpect(unauthenticated())
 //                .andExpect(authenticated())
         ;

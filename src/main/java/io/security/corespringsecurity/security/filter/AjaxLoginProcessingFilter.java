@@ -29,7 +29,6 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
     public AjaxLoginProcessingFilter() {
         //java: call to super must be first statement in constructor; super 호출은 항상 첫줄이어야 한다.
         super(new AntPathRequestMatcher("/api/login"));//사용자가 해당 url 을 호출했을때 AjaxLoginProcessingFilter 가 작동하도록
-//        super(new AntPathRequestMatcher("/**"));//사용자가 해당 url 을 호출했을때 AjaxLoginProcessingFilter 가 작동하도록
     }
 
     @Override

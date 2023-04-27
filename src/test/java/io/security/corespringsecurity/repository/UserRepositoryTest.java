@@ -43,7 +43,7 @@ public class UserRepositoryTest {
         //then
         assertThat(actualUser)
                 .extracting("username")
-                .isEqualTo("user");
+                .isEqualTo("testUser");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class UserRepositoryTest {
         //then
         assertThat(actualUser)
                 .extracting("username")
-                .isEqualTo("user");
+                .isEqualTo("testUser");
     }
 
 }

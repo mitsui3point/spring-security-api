@@ -1,12 +1,15 @@
 package io.security.corespringsecurity.security.configs;
 
 import io.security.corespringsecurity.security.filter.AjaxLoginProcessingFilter;
+import io.security.corespringsecurity.security.provider.AjaxAuthenticationProvider;
+import io.security.corespringsecurity.security.service.CustomUsersDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -14,8 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
+@RequiredArgsConstructor
 public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final CustomUsersDetailsService customUsersDetailsService;
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -23,21 +29,23 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(ajaxAuthenticationProvider());
         super.configure(auth);
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        super.configure(web);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class);
-//        http
-//                .csrf().disable();
-//        super.configure(http);
+                .antMatcher("/api/**")
+                .authorizeRequests()//특정 URL 대상으로만 설정 클래스에 관련된 보안 filter 가 작동되도록 설정
+                .anyRequest()//어떤 요청에도
+                .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
+
+        .and()
+                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//Ab stractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
+                //.userDetailsService(customUsersDetailsService)
+        ;
+        http.csrf().disable();
     }
 
     @Bean
@@ -50,5 +58,10 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider ajaxAuthenticationProvider() {
+        return new AjaxAuthenticationProvider(customUsersDetailsService, passwordEncoder());
     }
 }

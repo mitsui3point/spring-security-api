@@ -18,7 +18,7 @@ public class TestDataConstants {
 
     public static Account getUser(String password) {
         return Account.builder()
-                .username("user")
+                .username("testUser")
                 .password(password)
                 .age("11")
                 .role("USER")
@@ -29,7 +29,7 @@ public class TestDataConstants {
 
     public static Account getManager(String password) {
         return Account.builder()
-                .username("manager")
+                .username("testManager")
                 .password(password)
                 .age("11")
                 .role("MANAGER")
@@ -39,7 +39,7 @@ public class TestDataConstants {
 
     public static Account getAdmin(String password) {
         return Account.builder()
-                .username("admin")
+                .username("testAdmin")
                 .password(password)
                 .age("11")
                 .role("ADMIN")
