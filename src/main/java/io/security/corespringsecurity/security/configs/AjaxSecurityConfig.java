@@ -1,6 +1,9 @@
 package io.security.corespringsecurity.security.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.security.corespringsecurity.security.filter.AjaxLoginProcessingFilter;
+import io.security.corespringsecurity.security.handler.AjaxAuthenticationFailureHandler;
+import io.security.corespringsecurity.security.handler.AjaxAuthenticationSuccessHandler;
 import io.security.corespringsecurity.security.provider.AjaxAuthenticationProvider;
 import io.security.corespringsecurity.security.service.CustomUsersDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +13,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,6 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomUsersDetailsService customUsersDetailsService;
+    private final ObjectMapper mapper;
+
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -43,7 +49,6 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
 
         .and()
                 .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//Ab stractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
-                //.userDetailsService(customUsersDetailsService)
         ;
         http.csrf().disable();
     }
@@ -52,6 +57,8 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
     public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
         AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
         ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
+        ajaxLoginProcessingFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler());
+        ajaxLoginProcessingFilter.setAuthenticationFailureHandler(authenticationFailureHandler());
         return ajaxLoginProcessingFilter;
     }
 
@@ -63,5 +70,15 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationProvider ajaxAuthenticationProvider() {
         return new AjaxAuthenticationProvider(customUsersDetailsService, passwordEncoder());
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new AjaxAuthenticationSuccessHandler(mapper);
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new AjaxAuthenticationFailureHandler(mapper);
     }
 }

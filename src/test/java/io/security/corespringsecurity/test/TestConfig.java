@@ -1,5 +1,6 @@
 package io.security.corespringsecurity.test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.security.corespringsecurity.repository.UserRepository;
 import io.security.corespringsecurity.security.configs.AjaxSecurityConfig;
 import io.security.corespringsecurity.security.service.CustomUsersDetailsService;
@@ -23,7 +24,7 @@ public class TestConfig {
 
     @Bean
     public AjaxSecurityConfig ajaxSecurityConfig() {
-        return new AjaxSecurityConfig(customUsersDetailsService());
+        return new AjaxSecurityConfig(customUsersDetailsService(), objectMapper());
     }
 
     @Bean
@@ -34,5 +35,10 @@ public class TestConfig {
     @Bean
     public AuthenticationProvider ajaxAuthenticationProvider() {
         return ajaxSecurityConfig().ajaxAuthenticationProvider();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

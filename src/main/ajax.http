@@ -1,4 +1,4 @@
-### Send POST request with json body
+### login success
 POST http://localhost:8080/api/login
 Content-Type: application/json
 X-Requested-With: XMLHttpRequest
@@ -6,6 +6,17 @@ X-Requested-With: XMLHttpRequest
 {
   "username": "user",
   "password": "1111"
+}
+
+###
+### login failure
+POST http://localhost:8080/api/login
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "username": "user",
+  "password": "111"
 }
 
 ###

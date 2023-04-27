@@ -2,7 +2,9 @@ package io.security.corespringsecurity.controller.login;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.security.corespringsecurity.domain.Account;
 import io.security.corespringsecurity.domain.AccountDto;
+import io.security.corespringsecurity.repository.UserRepository;
 import io.security.corespringsecurity.test.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +23,9 @@ import static io.security.corespringsecurity.constants.TestDataConstants.RAW_PAS
 import static io.security.corespringsecurity.constants.TestDataConstants.getUser;
 import static io.security.corespringsecurity.constants.UrlConstant.LOGIN_URL;
 import static io.security.corespringsecurity.constants.UrlConstant.LOGOUT_URL;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -40,7 +45,10 @@ public class LoginControllerTest {
 
     MockMvc mvc;
 
-    private AccountDto user;
+    private AccountDto accountDto;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -51,7 +59,7 @@ public class LoginControllerTest {
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
 
-        user = mapper.readValue(mapper.writeValueAsString(getUser(passwordEncoder.encode(RAW_PASSWORD))), AccountDto.class);
+        accountDto = mapper.readValue(mapper.writeValueAsString(getUser(RAW_PASSWORD)), AccountDto.class);
     }
 
     @Test
@@ -80,18 +88,39 @@ public class LoginControllerTest {
     }
 
     @Test
-    @WithAnonymousUser
-    @DisplayName("/api/login 시도한다.")
+    @DisplayName("/api/login 실패한다.")
     void apiLogin() throws Exception {
         //when
         mvc.perform(post("/api/login")
                         .header("X-Requested-With", "XMLHttpRequest")
-                        .content(new ObjectMapper().writeValueAsString(user))
+                        .content(new ObjectMapper().writeValueAsString(accountDto))
                 )
                 .andDo(print())
                 //then
                 .andExpect(unauthenticated())
-//                .andExpect(authenticated())
+                .andExpect(content().string("\"Invalid (Username) or Password\""))
+        ;
+    }
+
+    @Test
+    @DisplayName("/api/login 성공한다.")
+    void apiLoginSuccess() throws Exception {
+        //given
+        Account account = getUser(passwordEncoder.encode(RAW_PASSWORD));
+        given(userRepository.findByUsername(any())).willReturn(account);
+        //when
+        mvc.perform(post("/api/login")
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .content(new ObjectMapper().writeValueAsString(accountDto))
+                )
+                .andDo(print())
+                //then
+                .andExpect(authenticated().withAuthenticationPrincipal(account))
+                .andExpect(jsonPath("$['username']").value(account.getUsername()))
+                .andExpect(jsonPath("$['password']").value(account.getPassword()))
+                .andExpect(jsonPath("$['role']").value(account.getRole()))
+                .andExpect(jsonPath("$['email']").value(account.getEmail()))
+                .andExpect(jsonPath("$['age']").value(account.getAge()))
         ;
     }
 }
