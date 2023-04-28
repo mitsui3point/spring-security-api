@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,12 +26,13 @@ public class LoginController {
         return "user/login/login";
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/api/logout")
+    @ResponseBody
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();//인증객체
         if (authentication != null) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);//session.invalidate();, 인증객체 비움
         }
-        return "redirect:/login";
+        return "logout ok";
     }
 }

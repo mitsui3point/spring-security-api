@@ -30,7 +30,7 @@ public class InitDataRegister {
                 .username("user")
                 .password(password)
                 .age("11")
-                .role("USER")
+                .role("ROLE_USER")
                 .email("aa@aa.com")
                 .build();
     }
@@ -40,7 +40,7 @@ public class InitDataRegister {
                 .username("manager")
                 .password(password)
                 .age("11")
-                .role("MANAGER")
+                .role("ROLE_MANAGER")
                 .email("aa@aa.com")
                 .build();
     }
@@ -50,7 +50,7 @@ public class InitDataRegister {
                 .username("admin")
                 .password(password)
                 .age("11")
-                .role("ADMIN")
+                .role("ROLE_ADMIN")
                 .email("aa@aa.com")
                 .build();
     }

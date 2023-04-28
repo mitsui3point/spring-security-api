@@ -1,6 +1,8 @@
 package io.security.corespringsecurity.security.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.security.corespringsecurity.security.common.AjaxAccessDeniedHandler;
+import io.security.corespringsecurity.security.common.AjaxLoginAuthenticationEntryPoint;
 import io.security.corespringsecurity.security.filter.AjaxLoginProcessingFilter;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationFailureHandler;
 import io.security.corespringsecurity.security.handler.AjaxAuthenticationSuccessHandler;
@@ -16,9 +18,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import static io.security.corespringsecurity.constants.RoleConstant.*;
 
 @Configuration
 //@EnableWebSecurity
@@ -44,11 +50,16 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .antMatcher("/api/**")
                 .authorizeRequests()//특정 URL 대상으로만 설정 클래스에 관련된 보안 filter 가 작동되도록 설정
+                .antMatchers("/api/messages").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
                 .anyRequest()//어떤 요청에도
                 .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
-
         .and()
                 .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//Ab stractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
+        ;
+        http
+                .exceptionHandling()
+                .authenticationEntryPoint(new AjaxLoginAuthenticationEntryPoint())//인증되지 않은 사용자 처리
+                .accessDeniedHandler(accessDeniedHandler())//인증된 유저중 인가받지 않은 사용자 처리
         ;
         http.csrf().disable();
     }
@@ -80,5 +91,10 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
         return new AjaxAuthenticationFailureHandler(mapper);
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new AjaxAccessDeniedHandler();
     }
 }

@@ -1,15 +1,4 @@
-### login success
-POST http://localhost:8080/api/login
-Content-Type: application/json
-X-Requested-With: XMLHttpRequest
-
-{
-  "username": "user",
-  "password": "1111"
-}
-
-###
-### login failure
+### login user failure
 POST http://localhost:8080/api/login
 Content-Type: application/json
 X-Requested-With: XMLHttpRequest
@@ -19,4 +8,41 @@ X-Requested-With: XMLHttpRequest
   "password": "111"
 }
 
-###
+### login user success
+POST http://localhost:8080/api/login
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "username": "user",
+  "password": "1111"
+}
+
+### user authorized failure(/api/messages)
+GET http://localhost:8080/api/messages
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+
+### logout user
+GET http://localhost:8080/api/logout
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+  "username": "user",
+}
+
+### login success manager
+POST http://localhost:8080/api/login
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest
+
+{
+"username": "manager",
+"password": "1111"
+}
+
+### after login access success(/api/messages)
+GET http://localhost:8080/api/messages
+Content-Type: application/json
+X-Requested-With: XMLHttpRequest

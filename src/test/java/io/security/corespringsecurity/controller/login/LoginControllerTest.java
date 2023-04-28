@@ -49,6 +49,7 @@ public class LoginControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+    private Account user;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -59,6 +60,7 @@ public class LoginControllerTest {
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
 
+        user = getUser(passwordEncoder.encode(RAW_PASSWORD));
         accountDto = mapper.readValue(mapper.writeValueAsString(getUser(RAW_PASSWORD)), AccountDto.class);
     }
 
@@ -71,20 +73,6 @@ public class LoginControllerTest {
                 .andDo(print())
                 //then
                 .andExpect(view().name("user/login/login"));
-    }
-
-    @Test
-    @WithMockUser(username = "user", password = "1111", roles = "USER")
-    @DisplayName("로그아웃하면 로그인페이지로 redirect 한다.")
-    void logoutTest() throws Exception {
-        //when
-        mvc.perform(get(LOGOUT_URL))
-                .andDo(print())
-                //then
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(LOGIN_URL))
-                .andExpect(unauthenticated())//인증되지 않은 상태
-        ;
     }
 
     @Test
@@ -106,8 +94,7 @@ public class LoginControllerTest {
     @DisplayName("/api/login 성공한다.")
     void apiLoginSuccess() throws Exception {
         //given
-        Account account = getUser(passwordEncoder.encode(RAW_PASSWORD));
-        given(userRepository.findByUsername(any())).willReturn(account);
+        given(userRepository.findByUsername(any())).willReturn(user);
         //when
         mvc.perform(post("/api/login")
                         .header("X-Requested-With", "XMLHttpRequest")
@@ -115,12 +102,30 @@ public class LoginControllerTest {
                 )
                 .andDo(print())
                 //then
-                .andExpect(authenticated().withAuthenticationPrincipal(account))
-                .andExpect(jsonPath("$['username']").value(account.getUsername()))
-                .andExpect(jsonPath("$['password']").value(account.getPassword()))
-                .andExpect(jsonPath("$['role']").value(account.getRole()))
-                .andExpect(jsonPath("$['email']").value(account.getEmail()))
-                .andExpect(jsonPath("$['age']").value(account.getAge()))
+                .andExpect(authenticated().withAuthenticationPrincipal(user))
+                .andExpect(jsonPath("$['username']").value(user.getUsername()))
+                .andExpect(jsonPath("$['password']").value(user.getPassword()))
+                .andExpect(jsonPath("$['role']").value(user.getRole()))
+                .andExpect(jsonPath("$['email']").value(user.getEmail()))
+                .andExpect(jsonPath("$['age']").value(user.getAge()))
+        ;
+    }
+
+    @Test
+    @WithMockUser(username = "user", password = "1111", roles = "USER")
+    @DisplayName("login 유저를 logout 시킨다.")
+    void apiLogout() throws Exception {
+        //given
+        given(userRepository.findByUsername(any())).willReturn(user);
+        //when
+        mvc.perform(get("/api/logout")
+                        .header("X-Requested-With", "XMLHttpRequest")
+                        .content(new ObjectMapper().writeValueAsString(accountDto))
+                )
+                .andDo(print())
+                //then
+                .andExpect(status().isOk())
+                .andExpect(unauthenticated())
         ;
     }
 }
