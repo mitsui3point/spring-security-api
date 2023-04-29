@@ -3,14 +3,18 @@ package io.security.corespringsecurity.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.security.corespringsecurity.domain.AccountDto;
 import io.security.corespringsecurity.security.configs.AjaxSecurityConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.DefaultCsrfToken;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -24,6 +28,7 @@ import java.io.IOException;
  * Filter 추가 {@link AjaxSecurityConfig}
  * http.addFilterBefore(AjaxAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
  */
+@Slf4j
 public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
     public AjaxLoginProcessingFilter() {
@@ -33,6 +38,7 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        loggingSessionCsrfTokenInfo(request.getSession());
         if (!isAjax(request)) {
             throw new IllegalStateException("Authentication is not supported");
         }
@@ -55,6 +61,25 @@ public class AjaxLoginProcessingFilter extends AbstractAuthenticationProcessingF
                 account.getPassword());
 
         return getAuthenticationManager().authenticate(authenticationToken);
+    }
+
+    private void loggingSessionCsrfTokenInfo(HttpSession session) {
+        if (session == null) {
+            return;
+        }
+        if (session.getAttributeNames().hasMoreElements()) {
+            String attrName = session.getAttributeNames().nextElement();
+            log.info("/api/login attemptAuthentication");
+            log.info("request.getSession().getId():{}", session.getId());
+            try {
+                DefaultCsrfToken csrfToken = (DefaultCsrfToken) session.getAttribute(attrName);
+                log.info("request.getSession().getAttribute({}):\n{}", attrName, csrfToken.getToken());
+            } catch (ClassCastException e) {
+                log.error("loggingSessionCsrfTokenInfo:");
+            } finally {
+                return;
+            }
+        }
     }
 
     private boolean isEmptyAccount(AccountDto accountDto) {

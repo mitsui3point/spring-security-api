@@ -23,6 +23,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 import static io.security.corespringsecurity.constants.RoleConstant.*;
 
@@ -54,14 +55,18 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()//어떤 요청에도
                 .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
         .and()
-                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//Ab stractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
+                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//AbstractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
         ;
         http
                 .exceptionHandling()
                 .authenticationEntryPoint(new AjaxLoginAuthenticationEntryPoint())//인증되지 않은 사용자 처리
                 .accessDeniedHandler(accessDeniedHandler())//인증된 유저중 인가받지 않은 사용자 처리
         ;
-        http.csrf().disable();
+        http
+                .csrf()
+                .disable()
+        //.csrfTokenRepository(new HttpSessionCsrfTokenRepository())
+        ;
     }
 
     @Bean
