@@ -18,14 +18,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
-import static io.security.corespringsecurity.constants.RoleConstant.*;
+import static io.security.corespringsecurity.constants.RoleConstant.MANAGER_ROLE;
 
 @Configuration
 //@EnableWebSecurity
@@ -54,8 +51,8 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/messages").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
                 .anyRequest()//어떤 요청에도
                 .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
-        .and()
-                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//AbstractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
+//        .and()
+//                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//AbstractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
         ;
         http
                 .exceptionHandling()
@@ -67,9 +64,17 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .disable()
         //.csrfTokenRepository(new HttpSessionCsrfTokenRepository())
         ;
+        ajaxCustomDslConfigurer(http);
     }
 
-    @Bean
+    private void ajaxCustomDslConfigurer(HttpSecurity http) throws Exception {
+        http.apply(new AjaxLoginConfigurer<>())
+                .ajaxAuthenticationManager(authenticationManagerBean())
+                .ajaxAuthenticationSuccessHandler(authenticationSuccessHandler())
+                .ajaxAuthenticationFailureHandler(authenticationFailureHandler())
+                .loginProcessingUrl("/api/login");
+    }
+
     public AjaxLoginProcessingFilter ajaxLoginProcessingFilter() throws Exception {
         AjaxLoginProcessingFilter ajaxLoginProcessingFilter = new AjaxLoginProcessingFilter();
         ajaxLoginProcessingFilter.setAuthenticationManager(authenticationManagerBean());
