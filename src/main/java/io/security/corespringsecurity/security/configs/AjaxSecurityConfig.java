@@ -11,6 +11,7 @@ import io.security.corespringsecurity.security.service.CustomUsersDetailsService
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,12 +22,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 import static io.security.corespringsecurity.constants.RoleConstant.MANAGER_ROLE;
+import static io.security.corespringsecurity.constants.UrlConstant.*;
 
 @Configuration
 //@EnableWebSecurity
 @RequiredArgsConstructor
+@Order(0)
 public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomUsersDetailsService customUsersDetailsService;
@@ -46,13 +50,14 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .antMatcher("/api/**")
+                .antMatcher("/api/**")//해당 URL 패턴 에만 security 인증
                 .authorizeRequests()//특정 URL 대상으로만 설정 클래스에 관련된 보안 filter 가 작동되도록 설정
                 .antMatchers("/api/messages").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
+                .antMatchers("/login").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
                 .anyRequest()//어떤 요청에도
                 .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
-//        .and()
-//                .addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//AbstractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
+        //.and()
+                //.addFilterBefore(ajaxLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)//AbstractAuthenticationProcessingFilter를 상속받은 filter 클래스를 UsernamePasswordAuthenticationFilter 앞에 등록
         ;
         http
                 .exceptionHandling()
@@ -62,7 +67,7 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf()
                 .disable()
-        //.csrfTokenRepository(new HttpSessionCsrfTokenRepository())
+                //.csrfTokenRepository(new HttpSessionCsrfTokenRepository())
         ;
         ajaxCustomDslConfigurer(http);
     }

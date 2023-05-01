@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,7 +39,7 @@ class UserControllerTest {
     }
 
     @Test
-    @WithAnonymousUser
+    @WithMockUser(username = "admin", password = "1111", roles = "USER")
     @DisplayName("/mypage 호출을 성공한다.")
     void myPage() throws Exception {
         //when
