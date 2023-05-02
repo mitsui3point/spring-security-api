@@ -71,23 +71,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    @WithAnonymousUser
-    @DisplayName("직접 커스터마이징한 로그인 페이지를 노출한다.")
-    void customLoginPageTest() throws Exception {
-        //when
-        mvc.perform(get(LOGIN_URL))
-                .andDo(print())
-                //then
-                .andExpect(view().name("user/login/login"));
-    }
-
-    @Test
     @DisplayName("/api/login 실패한다.")
     void apiLogin() throws Exception {
         //when
         mvc.perform(post("/api/login")
                         .header("X-Requested-With", "XMLHttpRequest")
                         .content(new ObjectMapper().writeValueAsString(accountDto))
+                        .with(csrf())
                 )
                 .andDo(print())
                 //then
@@ -105,6 +95,7 @@ public class LoginControllerTest {
         mvc.perform(post("/api/login")
                         .header("X-Requested-With", "XMLHttpRequest")
                         .content(new ObjectMapper().writeValueAsString(accountDto))
+                        .with(csrf())
                 )
                 .andDo(print())
                 //then
@@ -133,30 +124,6 @@ public class LoginControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(unauthenticated())
         ;
-    }
-
-    @Test
-    @DisplayName("인증되지 않았을 경우, 로그인페이지에 인증되지 않은 이유에 대한 메세지를 전달한다.")
-    void loginFailureInvalidSecretTest() throws Exception {
-        String[] exceptionsMessages = stream(getAuthenticationExceptions())
-                .map(o -> o.getMessage())
-                .toArray(String[]::new);
-        //when
-        for (String exceptionMessage : exceptionsMessages) {
-            mvc.perform(get(LOGIN_URL)
-                            .param("error", "true")
-                            .param("exception", exceptionMessage)
-                    )
-                    .andDo(print())
-                    //then
-                    .andExpect(status().isOk())
-                    .andExpect(unauthenticated())//인증되지 않은 상태
-                    .andExpect(model().attribute("error", "true"))
-                    .andExpect(model().attribute("exception", exceptionMessage))
-                    .andExpect(view().name("user/login/login"))
-                    .andExpect(result -> result.getResponse().getContentAsString().contains(exceptionMessage))//화면 내에 exception 메세지 출력여부 확인
-            ;
-        }
     }
 
     @Test

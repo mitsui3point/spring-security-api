@@ -53,7 +53,7 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatcher("/api/**")//해당 URL 패턴 에만 security 인증
                 .authorizeRequests()//특정 URL 대상으로만 설정 클래스에 관련된 보안 filter 가 작동되도록 설정
                 .antMatchers("/api/messages").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
-                .antMatchers("/login").hasRole(MANAGER_ROLE)//MANAGER ROLE 을 가진 사용자만 /api/messages GET 요청을 인가
+                .antMatchers("/api/login").permitAll()//모두 허용
                 .anyRequest()//어떤 요청에도
                 .authenticated()//인증을 받은 사용자가 해당 설정 클래스의 자원에 접근이 가능하도록
         //.and()
@@ -66,8 +66,8 @@ public class AjaxSecurityConfig extends WebSecurityConfigurerAdapter {
         ;
         http
                 .csrf()
-                .disable()
-                //.csrfTokenRepository(new HttpSessionCsrfTokenRepository())
+//                .disable()
+                .csrfTokenRepository(new HttpSessionCsrfTokenRepository())
         ;
         ajaxCustomDslConfigurer(http);
     }

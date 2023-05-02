@@ -5,7 +5,6 @@
 <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
 <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
 
-
 <script>
     function formLogin(e) {
 
@@ -55,7 +54,7 @@
                 <div class="form-group">
                     <input type="password" class="form-control" name="password" placeholder="비밀번호" required="required" >
                 </div>
-                <button type="button" onclick="javascript:formLogin(e)" class="btn btn-lg btn-primary btn-block">로그인</button>
+                <button type="button" onclick="javascript:formLogin()" class="btn btn-lg btn-primary btn-block">로그인</button>
             </form>
         </div>
     </div>

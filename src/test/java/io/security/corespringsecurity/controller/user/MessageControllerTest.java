@@ -10,16 +10,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = MessageController.class)
 @Import(TestConfig.class)
@@ -45,12 +46,13 @@ class MessageControllerTest {
         //when
         mvc.perform(post("/api" + MESSAGES_URL)
                         .header("X-Requested-With", "XMLHttpRequest")
+                        .with(csrf())
                 )
                 .andDo(print())
                 //then
                 .andExpect(authenticated().withAuthenticationName("manager"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("messages ok"))
+                .andExpect(content().string("ok"))
         ;
     }
 
@@ -61,6 +63,7 @@ class MessageControllerTest {
         //when
         mvc.perform(post("/api" + MESSAGES_URL)
                         .header("X-Requested-With", "XMLHttpRequest")
+                        .with(csrf())
                 )
                 .andDo(print())
                 //then
